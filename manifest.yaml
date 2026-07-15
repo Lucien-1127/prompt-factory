@@ -1,0 +1,162 @@
+# manifest.yaml
+# AI Capability Repository — Container Contract
+# Version: 1.0.0
+#
+# 這不是設定檔。這是 Repository 的身份宣告與入口契約。
+# 比較接近：npm package.json / pyproject.toml / devcontainer.json
+# 回答：「這個 Repository 是什麼？包含什麼？如何被 AI 載入？」
+#
+# 所有 AI 入口（Claude、GPT、Gemini、Agent、CLI）
+# 讀取本檔作為第一步，再按 entrypoints 載入對應資源。
+
+# ── Identity ──────────────────────────────────────────────────────────────────
+
+repository:
+  id: ai-capability-repository
+  name: AI Capability Repository
+  version: 1.0.0
+  description: >
+    跨 AI 平台可攜式能力儲存庫。
+    AI 可以直接閱讀，人可以管理，Agent 可以執行。
+    同一份 Repository 可被手機 AI App、雲端平台、Agent 系統、CLI 直接使用。
+  type: capability-repository
+  language: zh-TW
+
+# ── Compatibility ─────────────────────────────────────────────────────────────
+#
+# 列出已驗證可直接讀取本 Repository 的 AI 平台與入口。
+# 未列出的平台不代表不相容，只代表尚未驗證。
+
+compatibility:
+  ai_platforms:
+    - id: claude
+      entry: SKILL.md
+      notes: Claude Projects / API system prompt
+    - id: openai
+      entry: SKILL.md
+      notes: ChatGPT Projects / GPT Instructions / API system prompt
+    - id: gemini
+      entry: SKILL.md
+      notes: Gemini Gems / API system instruction
+    - id: hermes
+      entry: SKILL.md
+      notes: Agent 系統，支援 runtime/ 增強層
+    - id: openclaw
+      entry: SKILL.md
+      notes: 本地 Agent，支援 runtime/ 增強層
+  minimum_manifest_version: "1.0"
+
+# ── Entrypoints ───────────────────────────────────────────────────────────────
+#
+# 三類入口，對應三種讀取者。
+# AI 入口統一讀 SKILL.md，不綁定平台特有命名（Skill / Gem / Instruction）。
+# Runtime 入口供 Agent 與 API 使用，走完整 LCR 流程。
+
+entrypoints:
+  ai_native:
+    file: SKILL.md
+    description: >
+      所有 AI 平台的統一入口。
+      AI 讀取後應：載入 manifest → 發現 capabilities → 根據需求啟用能力。
+      不要直接執行 SKILL.md 內的能力，應透過 capabilities/ 載入。
+  human:
+    file: README.md
+    description: 人類閱讀入口，說明如何使用與擴充本 Repository。
+  runtime:
+    directory: runtime/
+    description: >
+      Agent / API / CLI 的程式化入口。
+      走完整 Resolver → Execution Planner → Emitter 流程。
+      需要支援 runtime/ 的 Host 才可使用。
+
+# ── Instructions ──────────────────────────────────────────────────────────────
+#
+# 全域行為規則，AI 載入後全程遵守。
+# 優先序高於個別 capability 的規則。
+
+instructions:
+  - file: instructions/system-rules.md
+    priority: critical
+    description: 全域系統規則，不可被 capability 或使用者指令覆寫
+  - file: instructions/behavior.md
+    priority: high
+    description: 行為風格與回應規範
+
+# ── Capabilities ──────────────────────────────────────────────────────────────
+#
+# 能力發現模式：directory（自動掃描）為主，index 為輔。
+# 不在 manifest 列出所有能力，避免 manifest 成為巨型索引。
+# AI 透過掃描 capabilities/ 目錄或讀取 capabilities/index.yaml 發現能力。
+
+capabilities:
+  discovery:
+    mode: directory
+    path: capabilities/
+    index:
+      enabled: true
+      file: capabilities/index.yaml
+      description: >
+        可選的靜態索引。存在時 AI 優先讀取（速度較快）。
+        不存在時 AI 直接掃描 capabilities/ 目錄。
+  capability_contract:
+    human_readable: capability.md    # 每個 capability 目錄下的 AI 可讀規格
+    machine_readable: capability.yaml # 每個 capability 目錄下的 IR Schema
+
+# ── Knowledge ─────────────────────────────────────────────────────────────────
+
+knowledge:
+  directory: knowledge/
+  description: >
+    背景知識庫。AI 在執行能力前可參考。
+    不是指令，是知識。
+
+# ── Runtime ───────────────────────────────────────────────────────────────────
+#
+# 可選增強層。不支援 runtime/ 的 AI 入口可忽略此區塊。
+# 支援 runtime/ 的 Agent 可獲得 Resolver、Planner、Adapter 等完整功能。
+
+runtime:
+  enabled: true
+  directory: runtime/
+  features:
+    resolver:
+      enabled: true
+      file: runtime/scripts/resolver.md
+      description: Candidate Scoring + Capability 選擇
+    execution_planner:
+      enabled: true
+      file: runtime/scripts/execution-planner.md
+      description: Capability DAG 規劃
+    emitter:
+      enabled: true
+      file: runtime/scripts/emitter.md
+      description: 多格式渲染（Prompt / Function Call / MCP / Workflow）
+    adapters:
+      enabled: true
+      directory: runtime/catalogs/adapters/
+      description: 各平台格式規則登錄表
+
+# ── Extensions ────────────────────────────────────────────────────────────────
+#
+# 第三方 Capability Pack。可獨立安裝、版本化、測試。
+# 結構：extensions/{pack-name}/manifest.yaml
+
+extensions:
+  directory: extensions/
+  discovery:
+    mode: directory
+
+# ── Descriptor ────────────────────────────────────────────────────────────────
+
+descriptor:
+  author: Lucien
+  license: MIT
+  tags:
+    - ai
+    - agent
+    - capability
+    - prompt-engineering
+    - llm
+  lifecycle: stable
+  created: "2026-07-16"
+  schema_version: "1.0"
