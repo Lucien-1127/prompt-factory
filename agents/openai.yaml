@@ -1,0 +1,13 @@
+interface:
+  display_name: 提示詞工廠
+  short_description: 先理解需求，再討論、建立與優化提示詞，按需設計有界代理迴圈
+  default_prompt: 使用 $prompt-factory，依我的需求討論、建立、優化或評估提示詞，保留原意並完整交付。
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

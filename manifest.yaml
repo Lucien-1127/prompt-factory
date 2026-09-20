@@ -1,185 +1,33 @@
-# manifest.yaml
-# AI Capability Repository — Container Contract
-# manifest_schema: "1.0"
-#
-# 這不是設定檔。這是 Repository 的身份宣告與入口契約。
-# 比較接近：npm package.json / pyproject.toml / devcontainer.json
-# 回答：「這個 Repository 是什麼？包含什麼？如何被 AI 載入？」
-#
-# 所有 AI 入口（Claude、GPT、Gemini、Agent、CLI）
-# 讀取本檔作為第一步，再按 entrypoints 載入對應資源。
-
-manifest_schema: "1.0"   # Manifest 格式版本，Parser 讀第一行即可知道
-
-# ── Identity ──────────────────────────────────────────────────────────────────
-
+manifest_schema: "1.0"
 repository:
-  id: ai-capability-repository
-  name: AI Capability Repository
-  version: "0.1.0"             # Repository 本身的版本（與 manifest_schema 分開）
-  description: >
-    跨 AI 平台可攜式能力儲存庫。
-    AI 可以直接閱讀，人可以管理，Agent 可以執行。
-    同一份 Repository 可被手機 AI App、雲端平台、Agent 系統、CLI 直接使用。
-  type: capability-repository
+  id: prompt-factory
+  name: 提示詞工廠
+  version: "11.1.0"
+  type: skill
   language: zh-TW
-
-# ── Compatibility ─────────────────────────────────────────────────────────────
-#
-# adapters 列出本 Repository 支援的入口層類型（不綁定具體平台）。
-# 結構：Repository → Adapter → AI Host
-# minimum_capability 定義 AI 入口需具備的最低能力，不具備者應降級使用。
-
-compatibility:
-  adapters:
-    - id: markdown-instruction
-      status: supported
-      description: >
-        基於 Markdown System Instruction 的 AI 入口。
-        適用：Claude Projects、ChatGPT Projects、Gemini Gems、
-        任何支援 Markdown 系統提示詞的平台。
-    - id: skill-loader
-      status: supported
-      description: >
-        支援 SKILL.md 自動載入的平台。
-        適用：Claude API、OpenAI API、支援系統提示詞自動載入的 Agent。
-    - id: runtime-agent
-      status: optional
-      description: >
-        支援 runtime/ 執行層的 Agent。
-        適用：Hermes、OpenClaw、自建 Agent、API Gateway。
-        不支援者忽略 runtime/ 區塊，不影響基本功能。
-  minimum_capability:
-    file_read: true        # AI 入口必須能讀取文字檔案
-    markdown: true         # AI 入口必須能理解 Markdown 格式
-    yaml: optional         # YAML 解析為選配（不支援者降級讀 capability.md）
-    runtime: optional      # runtime/ 為選配，不支援者忽略
-  minimum_manifest_version: "1.0"
-
-# ── Entrypoints ──────────────────────────────────────────────────────────────
-#
-# 三類入口，對應三種讀取者。
-# ai 入口統一讀 SKILL.md，不綁定平台特有命名。
-# runtime 入口標記 optional，不支援的平台忽略此區塊不報錯。
-
+  description: 按需討論、生成、優化及評估提示詞；代理、工具、視覺媒體與多代理契約分開載入。
 entrypoints:
   ai:
     file: SKILL.md
     optional: false
-    description: >
-      所有 AI 平台的統一入口。
-      AI 讀取後應：載入 manifest → 發現 capabilities → 根據需求啟用能力。
-      不要直接執行 SKILL.md 內的能力，應透過 capabilities/ 載入。
   human:
     file: README.md
     optional: false
-    description: 人類閱讀入口，說明如何使用與擴充本 Repository。
-  runtime:
-    directory: runtime/
+  interface:
+    file: agents/openai.yaml
     optional: true
-    description: >
-      Agent / API / CLI 的程式化入口。
-      走完整 Resolver → Execution Planner → Emitter 流程。
-      需要支援 runtime/ 的 Host 才可使用。
-
-# ── Instructions ──────────────────────────────────────────────────────────────
-#
-# 全域行為規則，AI 載入後全程遵守。
-# 優先序高於個別 capability 的規則。
-
-instructions:
-  - file: instructions/system-rules.md
-    priority: critical
-    description: 全域系統規則，不可被 capability 或使用者指令覆寫
-  - file: instructions/behavior.md
-    priority: high
-    description: 行為風格與回應規範
-
-# ── Capabilities ──────────────────────────────────────────────────────────────
-#
-# 能力發現模式：directory（自動掃描）為主，index 為選配快速路徑。
-# manifest 不列舉所有能力，避免成為巨型索引檔。
-#
-# 每個 capability 目錄包含：
-#   capability.md    AI 直接可讀的自然語言規格（必要）
-#   capability.yaml  Machine Readable IR Schema（選配，供 runtime 使用）
-#   examples/        使用範例
-#   README.md        人類說明
-
-capabilities:
-  discovery:
-    mode: directory
-    path: capabilities/
-    index:
-      enabled: true
-      file: capabilities/index.yaml
-      description: >
-        可選的靜態索引。存在時 AI 優先讀取（速度較快）。
-        不存在時 AI 直接掃描 capabilities/ 目錄。
-  contracts:
-    human_readable: capability.md     # 每個 capability 目錄下的 AI 可讀規格
-    machine_readable: capability.yaml  # 每個 capability 目錄下的 IR Schema（選配）
-
-# ── Knowledge ─────────────────────────────────────────────────────────────────
-
-knowledge:
-  directory: knowledge/
-  optional: true
-  description: >
-    背景知識庫。AI 執行能力前可參考。
-    不是指令，是知識。
-
-# ── Runtime ───────────────────────────────────────────────────────────────────
-#
-# 可選增強層。
-# status 三態：
-#   disabled   不使用 runtime（即使目錄存在）
-#   available  runtime 存在且有效，但未主動啟用
-#   enabled    runtime 存在且主動啟用，Agent 應優先使用
-
+resources:
+  - references/templates.md
+  - references/session-kernel.md
+  - references/agent-runtime-contract.md
+  - references/tool-contract.md
+  - references/orchestration.md
+  - references/evaluation-security.md
+validation:
+  script: scripts/validate_prompt_factory.py
+  regression_tests: scripts/test_validate_prompt_factory.py
+  behavior_fixtures: evals/behavior-cases.json
+  evidence_level: static
 runtime:
-  status: enabled
-  directory: runtime/
-  features:
-    resolver:
-      status: enabled
-      file: runtime/scripts/resolver.md
-      description: Candidate Scoring + Capability 選擇
-    execution_planner:
-      status: enabled
-      file: runtime/scripts/execution-planner.md
-      description: Capability DAG 規劃
-    emitter:
-      status: enabled
-      file: runtime/scripts/emitter.md
-      description: 多格式渲染（Prompt / Function Call / MCP / Workflow）
-    adapters:
-      status: enabled
-      directory: runtime/catalogs/adapters/
-      description: 各平台格式規則登錄表
-
-# ── Extensions ────────────────────────────────────────────────────────────────
-#
-# 第三方 Capability Pack。可獨立安裝、版本化、測試。
-# 發現規則：掃描 extensions/ 目錄，讀取各子目錄的 manifest.yaml。
-
-extensions:
-  status: enabled
-  discovery:
-    mode: directory
-    path: extensions/
-    manifest_file: manifest.yaml   # 每個 Extension 目錄下的入口宣告
-
-# ── Descriptor ────────────────────────────────────────────────────────────────
-
-descriptor:
-  author: Lucien
-  license: MIT
-  tags:
-    - ai
-    - agent
-    - capability
-    - prompt-engineering
-    - llm
-  lifecycle: stable
-  created: "2026-07-16"
+  status: disabled
+  description: 本套件提供提示詞與執行契約，不含自主執行器；工具能力依目標環境實際提供。
