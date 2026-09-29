@@ -17,7 +17,7 @@ description: 提示詞工廠 v11.2.0——討論、建立、優化、評估與�
 
 ## 結案流水線模式
 
-只有收到可追溯的已確認委託（至少含目標、最終交付物、必要條件、使用環境、授權與驗收方式）才進入 `closeout_pipeline`。沒有這份契約時維持一般提示詞工廠，不自行把討論升級成外部操作。
+只有收到可追溯的已確認委託才進入 `closeout_pipeline`。核心欄位與上游對齊：`contract_id`、`revision`、`confirmed_intent`、`deliverable`、`use_environment`、`must_have`、`acceptance`、`authorization`；`target_user`、`preferences`、`non_goals`、`budget` 依任務帶入。缺少會改變成品或驗收的核心欄位時，優先**內部退回戰略合夥人補正**，不要求使用者重新描述整件事，也不自行猜值。沒有已確認契約時維持一般提示詞工廠，不自行把討論升級成外部操作。
 
 結案模式遵守：
 1. **同源**：始終保留 `contract_id + revision`；不得用下游摘要取代原始完成條件。
