@@ -28,6 +28,7 @@ validation:
   script: scripts/validate_prompt_factory.py
   regression_tests: scripts/test_validate_prompt_factory.py
   behavior_fixtures: evals/behavior-cases.json
+  golden_samples: evals/golden-samples.json
   evidence_level: static
 runtime:
   status: disabled
