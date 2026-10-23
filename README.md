@@ -14,6 +14,7 @@
 | --- | --- |
 | `SKILL.md` | 動作路由、任務分級與統一交付契約 |
 | `references/templates.md` | 提示詞骨架 |
+| `references/technique-composition.md` | 依任務失敗模式自主選用並編譯技巧 |
 | `references/session-kernel.md` | 視覺媒體規格 |
 | `references/agent-runtime-contract.md` | 有界迴圈、狀態與停止條件 |
 | `references/tool-contract.md` | 工具與目標平台能力契約 |
