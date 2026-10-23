@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": "summary-three-points",
+      "input": "小王說週五前完成首頁草稿。主管確認先採用藍色主題。付款方式下週再討論。",
+      "expected_output": "- 週五前完成首頁草稿。\n- 首頁先採用藍色主題。\n- 付款方式延至下週討論。",
+      "max_bullets": 3,
+      "max_chars_per_bullet": 30,
+      "required_concepts": [
+        "首頁草稿",
+        "藍色主題",
+        "付款方式"
+      ],
+      "forbidden_claims": [
+        "明天上線",
+        "已付款",
+        "今天簽約"
+      ],
+      "evidence_level": "L2-human-authored-sample-not-runtime-execution"
+    }
+  ]
+}
