@@ -127,5 +127,24 @@ class ValidatorTests(unittest.TestCase):
         self.assertIn('technique-feedback-based-revision', ids)
 
 
+    def test_golden_sample_output_contract(self):
+        fixture = json.loads((ROOT / 'evals/golden-samples.json').read_text(encoding='utf-8'))
+        self.assertEqual(fixture['version'], 1)
+        guide = (ROOT / 'examples/summary-usage.md').read_text(encoding='utf-8')
+        for case in fixture['cases']:
+            self.assertIn(case['input'], guide)
+            self.assertIn(case['expected_output'], guide)
+            lines = case['expected_output'].splitlines()
+            self.assertEqual(len(lines), case['max_bullets'])
+            self.assertTrue(all(line.startswith('- ') for line in lines))
+            self.assertTrue(all(len(line[2:]) <= case['max_chars_per_bullet'] for line in lines))
+            for concept in case['required_concepts']:
+                self.assertIn(concept, case['input'])
+                self.assertIn(concept, case['expected_output'])
+            for unsupported in case['forbidden_claims']:
+                self.assertNotIn(unsupported, case['expected_output'])
+            self.assertTrue(case['evidence_level'].startswith('L2-'))
+
+
 if __name__ == '__main__':
     unittest.main()
