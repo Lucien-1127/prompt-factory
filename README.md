@@ -31,7 +31,8 @@
 | `references/orchestration.md` | 多代理分工與交接 |
 | `references/evaluation-security.md` | 評測、安全與證據分級 |
 | `agents/openai.yaml`、`assets/icon.svg` | 技能介面中繼資料與圖示 |
-| `scripts/`、`evals/behavior-cases.json` | 靜態檢查器、回歸測試及行為案例 |
+| `scripts/`、`evals/behavior-cases.json`、`evals/golden-samples.json` | 靜態檢查器、回歸測試、行為案例與實際輸出範例驗證 |
+| `examples/summary-prompt.md`、`examples/summary-usage.md` | 正式成品與獨立說明的雙份示例 |
 
 ## 版本同步
 
