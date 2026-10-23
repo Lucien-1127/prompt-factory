@@ -98,7 +98,7 @@ class ValidatorTests(unittest.TestCase):
         def read(path, *args, **kwargs):
             content = original(path, *args, **kwargs)
             if path == ROOT / 'manifest.yaml':
-                return content.replace('  - references/technique-composition.md\\n', '')
+                return content.replace('  - references/technique-composition.md', '# deliberately omitted for test')
             return content
         with patch.object(Path, 'read_text', read):
             errors, _ = validate(ROOT)
