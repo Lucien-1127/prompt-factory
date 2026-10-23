@@ -12,13 +12,14 @@ import yaml
 
 REFERENCE_FILES = (
     'references/templates.md',
+    'references/technique-composition.md',
     'references/session-kernel.md',
     'references/agent-runtime-contract.md',
     'references/tool-contract.md',
     'references/orchestration.md',
     'references/evaluation-security.md',
 )
-REQUIRED_FILES = ('SKILL.md', 'agents/openai.yaml', *REFERENCE_FILES,
+REQUIRED_FILES = ('SKILL.md', 'README.md', 'manifest.yaml', 'agents/openai.yaml', *REFERENCE_FILES,
                   'evals/behavior-cases.json')
 VALID_ACTIONS = {'boundary', 'discussion', 'generation', 'optimization', 'evaluation'}
 VALID_DOMAINS = {'general', 'image', 'video', 'agent', 'tools', 'orchestration', 'safety'}
@@ -142,6 +143,7 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
         metadata = frontmatter(text)
         if metadata.get('name') != 'prompt-factory':
             errors.append('SKILL.md: name must be prompt-factory')
+        dv = None
         description = metadata.get('description')
         if not isinstance(description, str) or not description.strip():
             errors.append('SKILL.md: description is required')
@@ -150,6 +152,24 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
             tv = re.search(r'^# 提示詞工廠 v(\d+\.\d+\.\d+)\s*$', text, re.MULTILINE)
             if not dv or not tv or dv.group(1) != tv.group(1):
                 errors.append('SKILL.md: missing or inconsistent semantic version')
+        manifest = load_yaml(root / 'manifest.yaml')
+        manifest_version = str(manifest.get('repository', {}).get('version', ''))
+        if not dv or manifest_version != dv.group(1):
+            errors.append('manifest.yaml: version differs from SKILL.md')
+        resources = manifest.get('resources', [])
+        if not isinstance(resources, list):
+            errors.append('manifest.yaml: resources must be a list')
+        else:
+            for name in REFERENCE_FILES:
+                if name not in resources:
+                    errors.append(f'manifest.yaml: missing registered resource {name}')
+        contract = (root / 'references/technique-composition.md').read_text(encoding='utf-8')
+        for required in ('證據閘門', '實際輸出檢驗', '有界自我迭代', '使用者 QC 閉環', '固定雙份交付契約'):
+            if required not in contract:
+                errors.append(f'technique composition contract: missing {required}')
+        for required in ('固定雙份交付', '自我迭代', '使用說明'):
+            if required not in text:
+                errors.append(f'SKILL.md: missing entrypoint behavior {required}')
         if len(text.splitlines()) > 500:
             errors.append('SKILL.md exceeds 500 lines')
         if '[TODO' in text:
