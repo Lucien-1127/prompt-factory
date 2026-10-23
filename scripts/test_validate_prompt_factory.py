@@ -79,5 +79,53 @@ class ValidatorTests(unittest.TestCase):
         self.assertTrue(any('broken heading link' in x for x in errors))
 
 
+    def test_technique_contract_and_evidence_gate(self):
+        contract = (ROOT / 'references/technique-composition.md').read_text(encoding='utf-8')
+        for token in ('理解問題', '資訊缺口盤點', '證據閘門', '實際輸出檢驗',
+                      '有界自我迭代', '使用者 QC 閉環', 'L1 靜態驗證',
+                      'L3 真實運行驗收', '固定雙份交付契約'):
+            with self.subTest(token=token):
+                self.assertIn(token, contract)
+
+    def test_manifest_references_include_technique_contract(self):
+        import yaml
+        manifest = yaml.safe_load((ROOT / 'manifest.yaml').read_text(encoding='utf-8'))
+        self.assertIn('references/technique-composition.md', manifest['resources'])
+        self.assertEqual(manifest['repository']['version'], '11.2.0')
+
+    def test_missing_new_reference_registration_is_detected(self):
+        original = Path.read_text
+        def read(path, *args, **kwargs):
+            content = original(path, *args, **kwargs)
+            if path == ROOT / 'manifest.yaml':
+                return content.replace('  - references/technique-composition.md\\n', '')
+            return content
+        with patch.object(Path, 'read_text', read):
+            errors, _ = validate(ROOT)
+        self.assertTrue(any('missing registered resource references/technique-composition.md'
+                            in error for error in errors))
+
+    def test_clean_example_and_separate_guide(self):
+        prompt_path = ROOT / 'examples/summary-prompt.md'
+        guide_path = ROOT / 'examples/summary-usage.md'
+        self.assertTrue(prompt_path.is_file())
+        self.assertTrue(guide_path.is_file())
+        prompt = prompt_path.read_text(encoding='utf-8')
+        guide = guide_path.read_text(encoding='utf-8')
+        for required in ('恰好三點', '30 個中文字', '繁體中文',
+                         '不加入未出現的事實', '逐字稿為空'):
+            self.assertIn(required, prompt)
+        for forbidden in ('## 如何使用', '## 示例', '技巧候選', '多代理',
+                          '請先閱讀使用說明'):
+            self.assertNotIn(forbidden, prompt)
+        for required in ('## 如何使用', '## 示例', '## 限制', '## 失敗時怎麼做'):
+            self.assertIn(required, guide)
+
+    def test_behavior_fixtures_include_user_qc(self):
+        ids = {case['id'] for case in self.fixture['cases']}
+        self.assertIn('user-qc-closed-loop', ids)
+        self.assertIn('technique-feedback-based-revision', ids)
+
+
 if __name__ == '__main__':
     unittest.main()
