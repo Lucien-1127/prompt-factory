@@ -143,6 +143,7 @@ def validate(root: Path) -> tuple[list[str], list[str]]:
         metadata = frontmatter(text)
         if metadata.get('name') != 'prompt-factory':
             errors.append('SKILL.md: name must be prompt-factory')
+        dv = None
         description = metadata.get('description')
         if not isinstance(description, str) or not description.strip():
             errors.append('SKILL.md: description is required')
