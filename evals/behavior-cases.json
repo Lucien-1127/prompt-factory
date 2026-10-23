@@ -558,6 +558,70 @@
           "虛構費用"
         ]
       }
+    },
+    {
+      "id": "autonomous-technique-composition",
+      "request": "建立能讀取近期資料、產出有來源摘要的提示詞；請工廠自行選需要的提示技巧，不要智慧路由。",
+      "actions": [
+        "generation"
+      ],
+      "domains": [
+        "general",
+        "tools"
+      ],
+      "expected": {
+        "must": [
+          "依外部事實需求納入檢索依據與來源規則",
+          "依目標平台的實際工具能力設計",
+          "選用技巧對應具體失敗模式"
+        ],
+        "must_not": [
+          "要求使用者自行勾選提示詞技巧",
+          "依模型品牌決定技巧",
+          "虛構搜尋工具"
+        ]
+      }
+    },
+    {
+      "id": "technique-minimalism",
+      "request": "幫我做一句話改寫提示詞：保留原意，輸出繁體中文。",
+      "actions": [
+        "generation"
+      ],
+      "domains": [
+        "general"
+      ],
+      "expected": {
+        "must": [
+          "保留原意與繁體中文",
+          "使用最小足夠指令"
+        ],
+        "must_not": [
+          "加入無關多代理",
+          "強制代理記憶與自我修正循環",
+          "展示固定技巧清單"
+        ]
+      }
+    },
+    {
+      "id": "skill-techniques-on-demand",
+      "request": "建立協助寫技術文件的 Skill，能針對複雜說明選用範例，但平常不要載入所有參考檔。",
+      "actions": [
+        "generation"
+      ],
+      "domains": [
+        "general"
+      ],
+      "expected": {
+        "must": [
+          "技巧按需選用且說明觸發條件",
+          "以 SKILL.md 和參考模組區分入口與細節"
+        ],
+        "must_not": [
+          "全部技巧永久內嵌主提示詞",
+          "把未驗證的技能稱為已實測"
+        ]
+      }
     }
   ]
 }
