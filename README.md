@@ -34,6 +34,14 @@
 | `scripts/`、`evals/behavior-cases.json`、`evals/golden-samples.json` | 靜態檢查器、回歸測試、行為案例與實際輸出範例驗證 |
 | `examples/summary-prompt.md`、`examples/summary-usage.md` | 正式成品與獨立說明的雙份示例 |
 
+## 圖像提示詞範例
+
+- [地藏王菩薩 iPhone 17 一鍵桌布提示詞](examples/jizo-iphone17-wallpaper-prompt.md)
+- [獨立繁體中文使用說明](examples/jizo-iphone17-wallpaper-usage.md)
+- [差異性與成品驗收規格](evals/jizo-wallpaper-acceptance.md)
+
+此範例維持每次可變構圖，不能保證跨會話圖片絕不重複；真實生成與手機顯示須另行驗收。
+
 ## 版本同步
 
 2026-09-20：同步目前已安裝的 v11.2.0 完整技能內容。舊入口使用通用能力容器規格，指向本儲存庫未提供的 `capabilities/`、`instructions/` 與 `runtime/`；本次將入口宣告對齊實際檔案。舊內容保留於 Git 版本歷史。
